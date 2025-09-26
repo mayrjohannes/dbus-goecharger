@@ -325,22 +325,12 @@ class DbusGoeChargerService:
         logging.warning("SetCurrent is higher than MaxCurrent. Limit reached. Set SetCurrent to MaxCurrent!")
         return self._setGoeChargerValue('amp', MaxCurrent)
       return self._setGoeChargerValue('amp', value)
+     
     elif path == '/StartStop':
-      # Wenn Automatisch (Modestatus = 1), dann im GoECharger auf 0 (Ueberschuss-Laden aktivieren) oder 1 (Laden deaktivieren) stellen
-      # wenn geplant (Modestatus = 2), dann im GoECharger auf x stellen - nicht implementiert
-      # wenn manuell (Modestatus = 0), dann im GoECharger auf 1 (Laden deaktivieren) und 2 (Laden aktivieren) stellen
-      modestatus = self._dbusservice['/Mode']
-      if modestatus == 0:  #manual Charging
-        return self._setGoeChargerValue('frc', value + 1)
-
-      elif modestatus == 1:  #automatic charging with sun
-        # pruefen, wo StartStop steht
-        if value == 1:
-          return self._setGoeChargerValue('frc', 0)
-        if value == 0:
-          return self._setGoeChargerValue('frc', 1)
+      if value == 1:
+        return self._setGoeChargerValue('frc', 0)
       else:
-        return False
+        return self._setGoeChargerValue('frc', 1)
 
     elif path == '/MaxCurrent':
       logging.warning("It's not allowed to set MaxCurrent via Victron! set MaxCurrent in your Go eCharger!")
