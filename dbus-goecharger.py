@@ -62,7 +62,6 @@ class DbusGoeChargerService:
     self._dbusservice.add_path('/Connected', 1)
     self._dbusservice.add_path('/UpdateIndex', 0)
     self._dbusservice.add_path("/Position", position)
-    self._dbusservice.add_path("/Mode", 1)
     self._dbusservice.add_path("/Status", None)
     
     # add path values to dbus
@@ -283,9 +282,9 @@ class DbusGoeChargerService:
             self._chargingTime = 0
           self._dbusservice['/ChargingTime'] = int(self._chargingTime)
 
-          if int(data['lmo'] == 5:
+          if int(data['lmo']) == 5:
             self._dbusservice['/Mode'] = 2  # 2..Geplant
-          elif int(data['lmo'] == 4:
+          elif int(data['lmo']) == 4:
             self._dbusservice['/Mode'] = 1  # 1..Automatic
           else:
             self._dbusservice['/Mode'] = 0  # 0..Manual
