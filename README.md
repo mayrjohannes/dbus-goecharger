@@ -95,6 +95,17 @@ Just grap a copy of the main branche and copy them to a folder under `/data/` e.
 Set permissions to execute for "install.sh", "restart.sh" and "uninstall.sh"
 After that call the install.sh script.
 
+The following script should do everything for you:
+```
+wget https://github.com/mayrjohannes/dbus-goecharger/archive/refs/heads/main.zip
+unzip main.zip "dbus-goecharger-main/*" -d /data
+mv /data/dbus-goecharger-main /data/dbus-goecharger
+chmod a+x /data/dbus-goecharger/install.sh
+/data/dbus-goecharger/install.sh
+rm main.zip
+```
+⚠️ Check configuration after that - because service is already installed an running and with wrong connection data (host) you will spam the log-file
+
 
 ### Change config.ini
 Within the project there is a file `/data/dbus-goecharger/config.ini` - just change the values - most important is the deviceinstance under "DEFAULT" and host in section "ONPREMISE". More details below:
