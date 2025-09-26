@@ -18,12 +18,10 @@ import configparser # for config/ini file
 
 # for AutomaticMode
 import dbus
-
  
 # our own packages from victron
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '/opt/victronenergy/dbus-systemcalc-py/ext/velib_python'))
 from vedbus import VeDbusService
-
 
 class DbusGoeChargerService:
   def __init__(self, servicename, paths, productname='go-eCharger', connection='go-eCharger HTTP JSON service'):
@@ -179,8 +177,7 @@ class DbusGoeChargerService:
     # check for Json
     if not json_data:
         raise ValueError("Converting response to JSON failed")
-    
-    
+     
     return json_data
  
 
@@ -277,6 +274,7 @@ class DbusGoeChargerService:
           '''
 
           #send data to DBus
+          self._dbusservice['/Ac/Voltage'] = int(data['nrg'][0])
           self._dbusservice['/Ac/L1/Power'] = int(data['nrg'][7])
           self._dbusservice['/Ac/L2/Power'] = int(data['nrg'][8])
           self._dbusservice['/Ac/L3/Power'] = int(data['nrg'][9])
@@ -284,7 +282,7 @@ class DbusGoeChargerService:
           self._dbusservice['/Current'] = max(data['nrg'][4], data['nrg'][5], data['nrg'][6])
           self._dbusservice['/Ac/Energy/Forward'] = round(data['wh'] / 1000, 2)
           
-          #self._dbusservice['/StartStop'] = int(data['alw'])
+          self._dbusservice['/StartStop'] = int(data['alw'])
           self._dbusservice['/SetCurrent'] = int(data['amp'])
           self._dbusservice['/MaxCurrent'] = int(data['ama']) 
           # update chargingTime, increment charge time only on active charging (2), reset when no car connected (1)
@@ -297,8 +295,17 @@ class DbusGoeChargerService:
 
           #self._dbusservice['/Mode'] = 1  # 0 = Manual, 1 = Automatic
           # i dont know how to trace the change of /Mode via VRM...
+        
+          config = self._getConfig()
+          hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
+          if '/MCU/Temperature' in self._dbusservice: # check if path exists, at some point it was removed
+             if hardwareVersion >= 3:
+                self._dbusservice['/MCU/Temperature'] = int(data['tma'][0] if data['tma'][0] else 0)
+             else:
+                self._dbusservice['/MCU/Temperature'] = int(data['tmp'])
 
-          # value 'car' 1: charging station ready, no vehicle 2: vehicle loads 3: Waiting for vehicle 4: Charge finished, vehicle still connected
+          # carState, null if internal error (Unknown/Error=0, Idle=1, Charging=2, WaitCar=3, Complete=4, Error=5)
+          # status 0=Disconnected; 1=Connected; 2=Charging; 3=Charged; 4=Waiting for sun; 5=Waiting for RFID; 6=Waiting for start; 7=Low SOC; 8=Ground fault; 9=Welded contacts; 10=CP Input shorted; 11=Residual current detected; 12=Under voltage detected; 13=Overvoltage detected; 14=Overheating detected
           status = 0
           if int(data['car']) == 1:
             status = 0
