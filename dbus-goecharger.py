@@ -42,11 +42,6 @@ class DbusGoeChargerService:
     
     logging.debug("%s /DeviceInstance = %d" % (servicename, deviceinstance))
     
-    paths_wo_unit = [
-      '/Status'#,  # value 'car' 1: charging station ready, no vehicle 2: vehicle loads 3: Waiting for vehicle 4: Charge finished, vehicle still connected
-      #'/Mode' 
-    ]
-    
     #get data from go-eCharger
     data = self._getGoeChargerData()
 
@@ -67,18 +62,13 @@ class DbusGoeChargerService:
     self._dbusservice.add_path('/Connected', 1)
     self._dbusservice.add_path('/UpdateIndex', 0)
     self._dbusservice.add_path("/Position", position)
-    #self._dbusservice.add_path("/Mode", 1)
-
-    # add paths without units
-    for path in paths_wo_unit:
-      self._dbusservice.add_path(path, None)
+    self._dbusservice.add_path("/Mode", 1)
+    self._dbusservice.add_path("/Status", None)
     
     # add path values to dbus
     for path, settings in self._paths.items():
       self._dbusservice.add_path(
         path, settings['initial'], gettextcallback=settings['textformat'], writeable=True, onchangecallback=self._handlechangedvalue)
-
-
 
     # last update
     self._lastUpdate = 0
@@ -357,10 +347,10 @@ class DbusGoeChargerService:
       # wenn geplant (Modestatus = 2), dann im GoECharger auf x stellen - nicht implementiert
       # wenn manuell (Modestatus = 0), dann im GoECharger auf 1 (Laden deaktivieren) und 2 (Laden aktivieren) stellen
       modestatus = self._dbusservice['/Mode']
-      if modestatus == 0:
+      if modestatus == 0:  #manual Charging
         return self._setGoeChargerValue('frc', value + 1)
 
-      elif modestatus == 1:
+      elif modestatus == 1:  #automatic charging with sun
         # pruefen, wo StartStop steht
         if value == 1:
           return self._setGoeChargerValue('frc', 0)
