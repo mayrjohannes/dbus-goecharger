@@ -293,8 +293,12 @@ class DbusGoeChargerService:
             self._chargingTime = 0
           self._dbusservice['/ChargingTime'] = int(self._chargingTime)
 
-          #self._dbusservice['/Mode'] = 1  # 0 = Manual, 1 = Automatic
-          # i dont know how to trace the change of /Mode via VRM...
+          if int(data['lmo'] == 5:
+            self._dbusservice['/Mode'] = 2  # 2..Geplant
+          elif int(data['lmo'] == 4:
+            self._dbusservice['/Mode'] = 1  # 1..Automatic
+          else:
+            self._dbusservice['/Mode'] = 0  # 0..Manual
         
           config = self._getConfig()
           hardwareVersion = int(config['DEFAULT']['HardwareVersion'])
