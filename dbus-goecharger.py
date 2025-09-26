@@ -71,13 +71,10 @@ class DbusGoeChargerService:
 
     # last update
     self._lastUpdate = 0
-    
     # charging time in float
     self._chargingTime = 0.0
-
     # add _update function 'timer'
     gobject.timeout_add(pauseBetweenRequests, self._update)
-    
     # add _signOfLife 'timer' to get feedback in log every 5minutes
     gobject.timeout_add(self._getSignOfLifeInterval()*60*1000, self._signOfLife)
  
